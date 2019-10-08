@@ -45,82 +45,86 @@ def welcome():
     )
 
 @app.route("/api/v1.0/precipitation")
-def names():
-    """Return a list of all passenger names"""
-    # Query all passengers
+def precipitation():
+    
     session = Session(engine)
-    results = session.query(Passenger.name).all()
-# only one value in it
-    # Convert list of tuples into normal list
-    all_names = list(np.ravel(results))
+    results = session.query(Measurement.date,Measurement.prcp).all()
+
+    all_prcp = []
+    for date,prcp in results:
+        prcp_dict={}
+        prcp_dict["date"]=date
+        prcp_dict["prcp"]=prcp
+        all_prcp.append(prcp_dict)
 # this list is not a dictionary
-    return jsonify(all_names)
+    return jsonify(all_prcp)
 
 
 @app.route("/api/v1.0/stations")
-def names():
-    """Return a list of all passenger names"""
-    # Query all passengers
+def station():
+    
+    # Query all stations
     session = Session(engine)
-    results = session.query(Passenger.name).all()
-# only one value in it
+    results = session.query(Station.name).all()
     # Convert list of tuples into normal list
-    all_names = list(np.ravel(results))
+    all_stations = list(np.ravel(results))
 # this list is not a dictionary
-    return jsonify(all_names)
+    return jsonify(all_stations)
+
 
 
 @app.route("/api/v1.0/tobs")
-def names():
-    """Return a list of all passenger names"""
-    # Query all passengers
+def tob():
+   
     session = Session(engine)
-    results = session.query(Passenger.name).all()
-# only one value in it
+    results = session.query(Measurement.station, Measurement.date,Measurement.tobs).all()
+
     # Convert list of tuples into normal list
-    all_names = list(np.ravel(results))
-# this list is not a dictionary
-    return jsonify(all_names)
+    all_tobs = []
+    for station,date,tobs in results:
+        tob_dict={}
+        tob_dict["station"]=station
+        tob_dict["date"]=date
+        tob_dict["tobs"]=tobs
+        all_tobs.append(tob_dict)
+
+    return jsonify(all_tobs)
 
 
 @app.route("/api/v1.0/<start>")
-def passengers():
-    """Return a list of passenger data including the name, age, and sex of each passenger"""
-    # Query all passengers
+def start():
+    
     session = Session(engine)
-    results = session.query(Passenger.name, Passenger.age, Passenger.sex).all()
-    # ORM query!!!!!!!!!!
-# more than one value in it. instead: 3!!!!---create a dictionary
-    # Create a dictionary from the row data and append to a list of all_passengers
-    all_passengers = []
-    for name, age, sex in results:
-        passenger_dict = {}
-        passenger_dict["name"] = name
-        passenger_dict["age"] = age
-        passenger_dict["sex"] = sex
-        all_passengers.append(passenger_dict)
+    results = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).\
+        filter(Measurement.date >= start_date).all()
 
-    return jsonify(all_passengers)
+    all_start_tobs = []
+    for name, age, sex in results:
+        start_dict = {}
+        start_dict["Max"] = name
+        start_dict["Avg"] = age
+        start_dict["Min"] = sex
+        all_start_tobs.append(start_dict)
+
+    return jsonify(all_start_tobs)
 
 
 @app.route("/api/v1.0/<start>/<end>")
-def passengers():
-    """Return a list of passenger data including the name, age, and sex of each passenger"""
-    # Query all passengers
+def startend():
+   
     session = Session(engine)
-    results = session.query(Passenger.name, Passenger.age, Passenger.sex).all()
-    # ORM query!!!!!!!!!!
-# more than one value in it. instead: 3!!!!---create a dictionary
-    # Create a dictionary from the row data and append to a list of all_passengers
-    all_passengers = []
+    results=session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).\
+        filter(Measurement.date >= start_date).filter(Measurement.date <= end_date).all()
+    
+    all_start_end_tobs = []
     for name, age, sex in results:
-        passenger_dict = {}
-        passenger_dict["name"] = name
-        passenger_dict["age"] = age
-        passenger_dict["sex"] = sex
-        all_passengers.append(passenger_dict)
+        start_end_dict = {}
+        start_end_dict["Max"] = name
+        start_end_dict["Avg"] = age
+        start_end_dict["Min"] = sex
+        all_start_end_tobs.append(start_end_dict)
 
-    return jsonify(all_passengers)
+    return jsonify(all_start_end_tobs)
 
 
 
