@@ -1,4 +1,5 @@
 import numpy as np
+import datetime as dt
 
 import sqlalchemy
 from sqlalchemy.ext.automap import automap_base
@@ -20,7 +21,6 @@ Base.prepare(engine, reflect=True)
 # Save reference to the table
 Station = Base.classes.station
 Measurement=Base.classes.measurement
-# Passenger is from the "station" table
 # Create our session (link) from Python to the DB
 
 
@@ -92,36 +92,49 @@ def tob():
 
 
 @app.route("/api/v1.0/<start>")
-def start():
+def start(start):
     
+    start_date=dt.date(start)
+
     session = Session(engine)
     results = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).\
         filter(Measurement.date >= start_date).all()
 
+    
+    a=func.min(Measurement.tobs)
+    b=func.avg(Measurement.tobs)
+    c=func.max(Measurement.tobs)
+
     all_start_tobs = []
-    for name, age, sex in results:
+    for a,b,c in results:
         start_dict = {}
-        start_dict["Max"] = name
-        start_dict["Avg"] = age
-        start_dict["Min"] = sex
+        start_dict["Max"] = a
+        start_dict["Avg"] = b
+        start_dict["Min"] = c
         all_start_tobs.append(start_dict)
 
     return jsonify(all_start_tobs)
 
 
 @app.route("/api/v1.0/<start>/<end>")
-def startend():
-   
+def startend(start,end):
+
+    start_date=dt.date(start)
+    end_date=dt.date(end)
     session = Session(engine)
     results=session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).\
         filter(Measurement.date >= start_date).filter(Measurement.date <= end_date).all()
     
+    a=func.min(Measurement.tobs)
+    b=func.avg(Measurement.tobs)
+    c=func.max(Measurement.tobs)
+
     all_start_end_tobs = []
-    for name, age, sex in results:
+    for a,b,c in results:
         start_end_dict = {}
-        start_end_dict["Max"] = name
-        start_end_dict["Avg"] = age
-        start_end_dict["Min"] = sex
+        start_end_dict["Max"] = a
+        start_end_dict["Avg"] = b
+        start_end_dict["Min"] = c
         all_start_end_tobs.append(start_end_dict)
 
     return jsonify(all_start_end_tobs)
